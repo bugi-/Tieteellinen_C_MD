@@ -3,6 +3,9 @@
 #include <gsl/gsl_rng.h>
 
 int init_cordinates(int *grid, int num_particles, int length) {
+    if (num_particles >= length * length) {
+        printf("Too many particles to fit the box!");
+    }
     int i;
     for (i = 0; i < length * length; i++) {
         grid[i] = 0;
