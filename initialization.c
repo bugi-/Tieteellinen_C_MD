@@ -19,16 +19,15 @@ int liquid_box_size(int N){
 }
 
 void init_particles(particle *particles, int num_particles, int length) {
-    int i, j;
     gsl_rng *rand_gen = gsl_rng_alloc(gsl_rng_mt19937);
-    for (i = 0; i < num_particles; i++) {
+    for (int i = 0; i < num_particles; i++) {
         /* Generate x and y for a particle */
         int rand1 = gsl_rng_uniform_int (rand_gen, length);
         int rand2 = gsl_rng_uniform_int (rand_gen, length);
         int rand3 = gsl_rng_uniform_int (rand_gen, length);
         /* Check if a particle with these coordinates already exists */
         int found = 0;
-        for (j = 0; j < i; j++) {
+        for (int j = 0; j < i; j++) {
             if (particles[j].x == rand1 && particles[i].y == rand2 && particles[i].z == rand3) {
                 i--;
                 found = 1;
@@ -40,8 +39,6 @@ void init_particles(particle *particles, int num_particles, int length) {
             new.x = rand1;
             new.y = rand2;
             new.z = rand3;
-//            new.x = rand1;
-//            new.y = rand2;
             particles[i] = new;
         }
     }
