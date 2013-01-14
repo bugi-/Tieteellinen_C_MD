@@ -1,6 +1,4 @@
-#ifndef COMMON_H
 #include "common.h"
-#endif
 #include <gsl/gsl_randist.h>
 
 #define EPS_PART 0.5 /* Epsilon for closeness check of particles*/
@@ -14,6 +12,13 @@ double gas_box_size(){
 }
 double liquid_box_size(){
     return 3.62 * cbrt(N_part);
+}
+double box_size(){
+#ifdef GAS
+    return gas_box_size();
+#elif defined LIQUID
+    return liquid_box_size();
+#endif
 }
 
 /* Calculates E_pot for the system */
@@ -72,35 +77,35 @@ void init_particles(particle *particles) {
 
 /* Functions for initializing velocities for the particles in both cases. Particles have to be generated for these to work. */
 void init_NVE_velocities(particle * particles, double E_tot) {
-    double gauss_nums[N_part];
-    double sum_gauss = 0;
+    double rand_nums[N_part];
+    double rand_nums_sum = 0;
     double v_components[3];
     for (int i = 0; i < N_part; i++) {
-        gauss_nums[i] = gsl_ran_ugaussian(rand_gen);
-        sum_gauss += gauss_nums[i];
+        rand_nums[i] = gsl_rng_uniform(rand_gen);
+        rand_nums_sum += rand_nums[i];
     }
     double E_kin = E_tot - potential_energy(particles);
     E_kin *= 2;
     E_kin /= M;
     for (int i = 0; i < N_part; i++) {
-        gauss_nums[i] /= sum_gauss;
-        gauss_nums[i] = sqrt(gauss_nums[i]); /* Use the same array for speeds to save space */
-        v_components[1] = gsl_rng_uniform(rand_gen);
-        v_components[2] = gsl_rng_uniform(rand_gen);
-        v_components[3] = gsl_rng_uniform(rand_gen);
+        rand_nums[i] /= rand_nums_sum;
+        rand_nums[i] = sqrt(rand_nums[i]); /* Use the same array for speeds to save space */
+        v_components[1] = 2*gsl_rng_uniform(rand_gen) - 1;
+        v_components[2] = 2*gsl_rng_uniform(rand_gen) - 1;
+        v_components[3] = 2*gsl_rng_uniform(rand_gen) - 1;
         double sum_v_comp = pow2(v_components[1]) + pow2(v_components[2]) + pow2(v_components[3]);
         sum_v_comp = sqrt(sum_v_comp);
         v_components[1] /= sum_v_comp;
         v_components[2] /= sum_v_comp;
         v_components[3] /= sum_v_comp;
-        particles[i].v_x = v_components[1] * gauss_nums[i];
-        particles[i].v_y = v_components[2] * gauss_nums[i];
-        particles[i].v_z = v_components[3] * gauss_nums[i];
+        particles[i].v_x = v_components[1] * rand_nums[i];
+        particles[i].v_y = v_components[2] * rand_nums[i];
+        particles[i].v_z = v_components[3] * rand_nums[i];
     }
     
 }
 
-void init_NVT_velocities(particle * particles, double T) {
+void init_NVT_velocities(particle *particles, double T) {
     for (int i = 0; i < N_part; i++) {
         double rand1 = gsl_ran_ugaussian(rand_gen);
         double rand2 = gsl_ran_ugaussian(rand_gen);
@@ -109,6 +114,33 @@ void init_NVT_velocities(particle * particles, double T) {
         particles[i].v_x = rand1 * scale_factor;
         particles[i].v_y = rand2 * scale_factor;
         particles[i].v_z = rand3 * scale_factor;
+    }
+    remove_CM_velocity(particles);
+}
+
+void init_velocities(particle *particles, double E) {
+#ifdef NVE
+    init_NVE_velocities(particles, E);
+#elif defined NVT
+    init_NVT_velocities(particles, E);
+#endif
+}
+
+void remove_CM_velocity(particle *particles) {
+    vector V_tot = {0.0, 0.0, 0.0};
+    for (int i = 0; i < N_part; i++) {
+        V_tot.x += particles[i].v_x;
+        V_tot.y += particles[i].v_y;
+        V_tot.z += particles[i].v_z;
+    }
+    /* Particles have equal masses */
+    V_tot.x /= pow2(N_part);
+    V_tot.y /= pow2(N_part);
+    V_tot.z /= pow2(N_part);
+    for (int i = 0; i < N_part; i++) {
+        particles[i].v_x -= V_tot.x;
+        particles[i].v_y -= V_tot.y;
+        particles[i].v_z -= V_tot.z;
     }
 }
 
