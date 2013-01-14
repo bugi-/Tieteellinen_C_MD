@@ -12,6 +12,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>common.h</itemPath>
+      <itemPath>initialization.c</itemPath>
       <itemPath>main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -24,9 +26,8 @@
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
+      <itemPath>md.ini</itemPath>
     </logicalFolder>
-    <itemPath>/cs/fs/home/jpaeskel/NetBeansProjects/Tieteellinen_C_MD/initialization.c</itemPath>
-    <itemPath>/cs/fs/home/jpaeskel/NetBeansProjects/Tieteellinen_C_MD/md.ini</itemPath>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -41,12 +42,15 @@
           <incDir>
             <pElem>/usr/include</pElem>
           </incDir>
-          <commandLine>-g -Wall -pedantic</commandLine>
+          <commandLine>-g -pedantic -lm</commandLine>
+          <warningLevel>2</warningLevel>
         </cTool>
         <linkerTool>
+          <commandlineTool>gcc</commandlineTool>
           <linkerLibItems>
             <linkerOptionItem>-lgsl</linkerOptionItem>
             <linkerOptionItem>-lgslcblas</linkerOptionItem>
+            <linkerOptionItem>-lm</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

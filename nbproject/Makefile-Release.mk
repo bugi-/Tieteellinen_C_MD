@@ -35,7 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/993669479/initialization.o \
+	${OBJECTDIR}/initialization.o \
 	${OBJECTDIR}/main.o
 
 
@@ -63,10 +63,10 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tieteellinen_c_md: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tieteellinen_c_md ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
-${OBJECTDIR}/_ext/993669479/initialization.o: /cs/fs/home/jpaeskel/NetBeansProjects/Tieteellinen_C_MD/initialization.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/993669479
+${OBJECTDIR}/initialization.o: initialization.c 
+	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/993669479/initialization.o /cs/fs/home/jpaeskel/NetBeansProjects/Tieteellinen_C_MD/initialization.c
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/initialization.o initialization.c
 
 ${OBJECTDIR}/main.o: main.c 
 	${MKDIR} -p ${OBJECTDIR}
