@@ -7,17 +7,17 @@ gsl_rng *rand_gen;
 
 /* Define length of a side in the simulation grid in Å. Sizes are the ones asked to be used. */
 /* Cast to int to make things easier */
-int gas_box_size(int N){
-    return (int)(33.38 * cbrt(N));
+double gas_box_size(){
+    return 33.38 * cbrt(N_part);
 }
-int liquid_box_size(int N){
-    return (int)(3.62 * cbrt(N));
+double liquid_box_size(){
+    return 3.62 * cbrt(N_part);
 }
 
 /* Calculates E_pot for the system */
-double potential_energy(particle *particles, int N) {
+double potential_energy(particle *particles) {
     double tot_U = 0.0;
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N_part; i++) {
         for (int j = 0; j < i; j++) {
             double r_ij = sqrt(pow2(abs(particles[i].x - particles[j].x))
             + pow2(abs(particles[i].y - particles[j].y))
@@ -28,8 +28,9 @@ double potential_energy(particle *particles, int N) {
     return tot_U;
 }
 
-void init_particles(particle *particles, int num_particles, int length) {
-    for (int i = 0; i < num_particles; i++) {
+void init_particles(particle *particles) {
+    double length = box_size();
+    for (int i = 0; i < N_part; i++) {
         /* Generate x, y and z for a particle */
         double rand1 = length * gsl_rng_uniform(rand_gen);
         double rand2 = length * gsl_rng_uniform(rand_gen);
@@ -53,32 +54,32 @@ void init_particles(particle *particles, int num_particles, int length) {
     }
 }
 
-void init_gas_particles(particle *particles, int num_particles) {
-    init_particles(particles, num_particles, gas_box_size(num_particles));
-}
-
-void init_liquid_particles(particle *particles, int num_particles) {
-    init_particles(particles, num_particles, liquid_box_size(num_particles));
-}
+//void init_gas_particles(particle *particles) {
+//    initialize_particles(particles);
+//}
+//
+//void init_liquid_particles(particle *particles) {
+//    initialize_particles(particles);
+//}
 
 /* Functions for initializing velocities for the particles in both cases. Particles have to be generated for these to work. */
-void init_NVE_velocities(particle * particles, int N, double E_tot) {
-    double gauss_nums[N];
+void init_NVE_velocities(particle * particles, double E_tot) {
+    double gauss_nums[N_part];
     double sum_gauss = 0;
     double v_components[3];
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N_part; i++) {
         gauss_nums[i] = gsl_ran_ugaussian(rand_gen);
         sum_gauss += gauss_nums[i];
     }
-    double E_kin = E_tot - potential_energy(particles, N);
+    double E_kin = E_tot - potential_energy(particles);
     E_kin *= 2;
     E_kin /= M;
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N_part; i++) {
         gauss_nums[i] /= sum_gauss;
         gauss_nums[i] = sqrt(gauss_nums[i]); /* Use the same array for speeds to save space */
-        v_components[1] = gsl_ran_ugaussian(rand_gen);
-        v_components[2] = gsl_ran_ugaussian(rand_gen);
-        v_components[3] = gsl_ran_ugaussian(rand_gen);
+        v_components[1] = gsl_rng_uniform(rand_gen);
+        v_components[2] = gsl_rng_uniform(rand_gen);
+        v_components[3] = gsl_rng_uniform(rand_gen);
         double sum_v_comp = pow2(v_components[1]) + pow2(v_components[2]) + pow2(v_components[3]);
         sum_v_comp = sqrt(sum_v_comp);
         v_components[1] /= sum_v_comp;
@@ -91,8 +92,8 @@ void init_NVE_velocities(particle * particles, int N, double E_tot) {
     
 }
 
-void init_NVT_velocities(particle * particles, int N, double T) {
-    for (int i = 0; i < N; i++) {
+void init_NVT_velocities(particle * particles, double T) {
+    for (int i = 0; i < N_part; i++) {
         double rand1 = gsl_ran_ugaussian(rand_gen);
         double rand2 = gsl_ran_ugaussian(rand_gen);
         double rand3 = gsl_ran_ugaussian(rand_gen);
@@ -106,12 +107,12 @@ void init_NVT_velocities(particle * particles, int N, double T) {
 int main(void) {
     rand_gen = gsl_rng_alloc(RNG);
     gsl_rng_set(rand_gen, SEED);
-    int N = 10;
-    particle *particles = (particle *)calloc(N, sizeof(particle));
-    init_gas_particles(particles, N);
-//    for (int i = 0; i < N; i++) {
-//        printf("%f %f %f\n", particles[i].x, particles[i].y, particles[i].z);
-//    }
+    particle *particles = (particle *)calloc(N_part, sizeof(particle));
+    init_particles(particles);
+    init_velocities(particles, .0259);
+    for (int i = 0; i < N_part; i++) {
+        printf("%f %f %f %f %f %f\n", particles[i].x, particles[i].y, particles[i].z, particles[i].v_x, particles[i].v_y, particles[i].v_z);
+    }
     gsl_rng_free(rand_gen);
     return 0;
 }
