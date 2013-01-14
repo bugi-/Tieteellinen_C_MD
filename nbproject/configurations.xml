@@ -15,6 +15,7 @@
       <itemPath>common.h</itemPath>
       <itemPath>initialization.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>simulation.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"

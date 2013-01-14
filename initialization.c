@@ -1,4 +1,6 @@
+#ifndef COMMON_H
 #include "common.h"
+#endif
 #include <gsl/gsl_randist.h>
 
 #define EPS_PART 0.5 /* Epsilon for closeness check of particles*/
@@ -17,11 +19,17 @@ double liquid_box_size(){
 /* Calculates E_pot for the system */
 double potential_energy(particle *particles) {
     double tot_U = 0.0;
+    double half_L = 0.5 * box_size();
     for (int i = 0; i < N_part; i++) {
         for (int j = 0; j < i; j++) {
-            double r_ij = sqrt(pow2(abs(particles[i].x - particles[j].x))
-            + pow2(abs(particles[i].y - particles[j].y))
-            + pow2(abs(particles[i].z - particles[j].z)));
+            double dx = abs(particles[i].x - particles[j].x);
+            double dy = abs(particles[i].y - particles[j].y);
+            double dz = abs(particles[i].z - particles[j].z);
+            /* Boundary conditions */
+            if (dx > half_L) dx -= half_L;
+            if (dy > half_L) dy -= half_L;
+            if (dz > half_L) dz -= half_L;
+            double r_ij = sqrt(pow2(dx) + pow2(dy) + pow2(dz));
             tot_U += EPS4 * (pow12(SIGMA/r_ij) - pow6(SIGMA/r_ij));
         }
     }
